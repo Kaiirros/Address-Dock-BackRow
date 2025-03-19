@@ -1,0 +1,11 @@
+export const SUCCESS_STATUS: string = 'success';
+export const FAILURE_STATUS: string = 'failure';
+export const RESPONSE_STATUS_OK: string = 'OK';
+export const RESPONSE_STATUS_FAIL: string = 'FAILED';
+export const RESPONSE_EVENT_CREATE: string = 'CREATE';
+export const RESPONSE_EVENT_READ: string = 'READ';
+export const RESPONSE_EVENT_UPDATE: string = 'UPDATE';
+export const RESPONSE_EVENT_DELETE: string = 'DELETE';
+export const RESPONSE_EVENT_CANCEL: string = 'CANCEL';
+export const RESPONSE_EVENT_AUTHENTICATION: string = 'AUTH';
+export const IS_TEST_RUNNING: boolean = process.env.NODE_ENV === 'test';
