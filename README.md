@@ -2,6 +2,6 @@
 
 ## Set Up Your Local Dev Environment and Run
 
-# Install NVM and Node v20.13.1
-# From the root directory, run `npm install`
-# Start the app using `npm run dev`
+1. Install NVM and Node v20.13.1
+2. From the root directory, run `npm install`
+3. Start the app using `npm run dev`
