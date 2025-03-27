@@ -28,13 +28,13 @@ app.use(async (req, res: Response, next: NextFunction) => {
 });
 
 app.use(async (err: any, req: Request, res: Response, next: NextFunction) => {
-    loggerService.error({ message: err.message, path: req.path }).flush();
-    res.status(500).send({
-        error: {
-            status: 500,
-            message: "Internal Error",
-        }
-    });
+  loggerService.error({ message: err.message, path: req.path }).flush();
+  res.status(err.status || 500).send({
+    error: {
+      status: err.status || 500,
+      message: err.message || "Internal Error",
+    },
+  });
 });
 
 export default app;
