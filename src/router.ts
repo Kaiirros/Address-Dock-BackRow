@@ -27,7 +27,7 @@ function getEndpointControllerPath(req: Request): string {
     const ext = (ENV === 'dev') ? 'ts' : 'js';
     const route = `${__dirname}/endpoints/${paths[1]}.endpoint.${ext}`;
     if (paths.length === 1 || !fs.existsSync(route) || paths[1] == 'base') {
-        throw new createHttpError.BadRequest();
+        throw new createHttpError.NotFound(`Endpoint ${req.originalUrl} not found`);
     }
 
     return route;
