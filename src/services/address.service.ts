@@ -90,13 +90,13 @@ class AddressService {
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
          // convert and return distance in KM
-        return R * c;
+        return parseFloat((R * c).toFixed(4));
     }
 
     private async getMilesDistance(lat1: string, lon1: string, lat2: string, lon2: string) {
         const kilometers = await this.getKilometerDistance(lat1, lon1, lat2, lon2);
         const milesPerKilometer = 0.621371;
-        return kilometers * milesPerKilometer;
+        return parseFloat((kilometers * milesPerKilometer).toFixed(4));
     }
 
 
