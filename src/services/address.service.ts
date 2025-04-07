@@ -10,7 +10,7 @@ class AddressService {
             this.request(addressRequest)
                 .then((response) => {
                     resolve({
-                        "count": response.size()
+                        "count": response.length
                     });
                 })
                 .catch((err) => {
