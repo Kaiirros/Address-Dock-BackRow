@@ -35,6 +35,39 @@ class AddressService {
         });
     }
 
+    public async getCityByZip(zipcode: string): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            if (!zipcode || typeof zipcode !== "string") {
+                reject(new Error("Invalid zip code provided."));
+                return;
+            }
+    
+            fetch(AddressService.fetchUrl, {
+                method: "POST",
+                body: JSON.stringify({ zipcode }),
+                headers: { "Content-Type": "application/json" }
+            })
+                .then(async (response) => {
+                    if (!response.ok) {
+                        reject(new Error("Failed to fetch city for the provided zip code."));
+                        return;
+                    }
+    
+                    const data = await response.json() as { city: string }[];
+                    if (data.length === 0) {
+                        reject(new Error("No city found for the provided zip code."));
+                        return;
+                    }
+    
+                    resolve(data[0].city); // Assuming the API returns an array of results
+                })
+                .catch((err) => {
+                    loggerService.error({ path: "/address/getCityByZip", message: err.message }).flush();
+                    reject(err);
+                });
+        });
+    }
+
     public async distance(addressRequest?: any): Promise<any> {
         // Complete this
     }

@@ -21,6 +21,10 @@ router.delete('*', (req: Request, res: Response, next: NextFunction) => {
     (require(getEndpointControllerPath(req))).deleteRoute(req, res, next);
 });
 
+router.post('/address/zipcode', (req: Request, res: Response, next: NextFunction) => {
+    (require(getEndpointControllerPath(req))).postRoute(req, res, next);
+});
+
 function getEndpointControllerPath(req: Request): string {
     const paths = req.baseUrl.split('/');
 
