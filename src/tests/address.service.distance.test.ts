@@ -76,7 +76,8 @@ describe("Address Service", () => {
             }
         };
 
-        await expect(addressService.distance(addressRequest)).rejects.toThrow("Invalid unit");
+        const response = await addressService.distance(addressRequest);
+        expect(response).toHaveProperty("error", "Invalid unit");
     });
 
     it("Throw exception if latitude is missing", async () => {
@@ -89,6 +90,37 @@ describe("Address Service", () => {
             }
         };
 
-        await expect(addressService.distance(addressRequest)).rejects.toThrow("Missing required coordinates");
+        const response = await addressService.distance(addressRequest);
+        expect(response).toHaveProperty("error", "Missing required coordinates");
+    });
+
+    it("Throw exception if coordinates are not valid numbers", async () => {
+        const addressRequest = {
+            body: {
+                lat1: "invalid",
+                lon1: -74.0060,
+                lat2: 34.0522,
+                lon2: "invalid",
+                unit: "KM"
+            }
+        };
+
+        const response = await addressService.distance(addressRequest);
+        expect(response).toHaveProperty("error", "Coordinates must be valid numbers");
+    });
+
+    it("Throw exception if coordinates are NaN", async () => {
+        const addressRequest = {
+            body: {
+                lat1: NaN,
+                lon1: -74.0060,
+                lat2: 34.0522,
+                lon2: NaN,
+                unit: "KM"
+            }
+        };
+
+        const response = await addressService.distance(addressRequest);
+        expect(response).toHaveProperty("error", "Missing required coordinates");
     });
 });

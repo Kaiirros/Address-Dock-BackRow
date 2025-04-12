@@ -36,34 +36,55 @@ class AddressService {
         });
     }
 
+
     public async distance(addressRequest?: any): Promise<any> {
-        const { lat1, lon1, lat2, lon2, unit} = addressRequest.body;
-        if (!lat1 || !lon1 || !lat2 || !lon2) {
-            throw new Error("Missing required coordinates");
-        }
+        // This method calculates the distance between two coordinates and returns the result
 
-        let distance = null;
-        if ( unit == "KM" ) {
-            distance = await this.getKilometerDistance(lat1, lon1, lat2, lon2);
-        } else if ( unit == "Mi" ) {
-            distance = await this.getMilesDistance(lat1, lon1, lat2, lon2);
-        } else {
-            throw new Error("Invalid unit");
-        }
+        /**
+         * Request body should contain JSON:
+         * {
+         *   lat1: string,
+         *   lon1: string,
+         *   lat2: string,
+         *   lon2: string,
+         *   unit: string // "KM" or "Mi"
+         * }
+         */
 
-        return new Promise<any>(async (resolve, reject) => {
-            fetch(AddressService.fetchUrl, {
-                method: "POST",
-                body: JSON.stringify({distance})
-            })
-                .then(async (response) => {
-                    resolve({distance});
-                })
-                .catch((err) => {
-                    loggerService.error({ path: "/address/distance", message: `${(err as Error).message}` }).flush();
-                    reject(err);
-                });
-        });
+        const { lat1, lon1, lat2, lon2, unit } = addressRequest.body;
+
+        try {
+            let distance = null;
+
+            const numberRegex = /^-?\d+(\.\d+)?$/;
+
+            if (!lat1 || !lon1 || !lat2 || !lon2) {
+                const errorMessage = "Missing required coordinates";
+                loggerService.error({ path: "/address/distance", message: errorMessage }).flush();
+                throw new Error(errorMessage);
+            }
+
+            if (!numberRegex.test(lat1) || !numberRegex.test(lon1) || !numberRegex.test(lat2) || !numberRegex.test(lon2)) {
+                const errorMessage = "Coordinates must be valid numbers";
+                loggerService.error({ path: "/address/distance", message: errorMessage }).flush();
+                throw new Error(errorMessage);
+            }
+
+            if (unit === "KM") {
+                distance = await this.getKilometerDistance(lat1, lon1, lat2, lon2);
+            } else if (unit === "Mi") {
+                distance = await this.getMilesDistance(lat1, lon1, lat2, lon2);
+            } else {
+                throw new Error("Invalid unit");
+            }
+
+            return { distance };
+
+        } catch (err) {
+            const errorMessage = (err as Error).message;
+            loggerService.error({ path: "/address/distance", message: errorMessage }).flush();
+            return { error: errorMessage };
+        }
     }
 
     private async getKilometerDistance(lat1: string, lon1: string, lat2: string, lon2: string) {

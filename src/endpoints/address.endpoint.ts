@@ -35,7 +35,6 @@ class AddressEndpoint extends baseEndpoint {
     private distance_post(req: Request, res: Response, next: NextFunction) {
         addressService.distance(req)
             .then((response) => {
-                console.log("Distance response:", response);
                 res.status(200).send(responseWrapper(RESPONSE_STATUS_OK, RESPONSE_EVENT_READ, response));
             }).catch((err) => {
                 res.status(400).send(responseWrapper(RESPONSE_STATUS_FAIL, RESPONSE_EVENT_READ, err));
