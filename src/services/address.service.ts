@@ -37,48 +37,105 @@ class AddressService {
     }
 
 
+    /**
+     * Calculate the distance between two locations.
+     * @param addressRequest - The request object containing location1 and location2.
+     * 
+     * The body request should contain:
+     * - location1: The first location object. (Can mix and match any of the following properties)
+     * > - zipcode: The zipcode of the location.
+     * > - number: The number of the location.
+     * > - street: The street of the location.
+     * > - street2: The second street of the location.
+     * > - city: The city of the location.
+     * > - state: The state of the location.
+     * > - country: The country of the location.
+     * - location2: The second location object.
+     * > - Same properties as location1
+     * - unit: The unit of measurement for the distance (KM or Mi).
+     * 
+     * @returns The distance between the two locations in the specified unit (KM or Mi).
+     * 
+     */
     public async distance(addressRequest?: any): Promise<any> {
-        // This method calculates the distance between two coordinates and returns the result
 
-        /**
-         * Request body should contain JSON:
-         * {
-         *   lat1: string,
-         *   lon1: string,
-         *   lat2: string,
-         *   lon2: string,
-         *   unit: string // "KM" or "Mi"
-         * }
-         */
+        if (addressRequest.body) {
+            try {
+                let location1 = addressRequest.body.location1;
+                let location2 = addressRequest.body.location2;
 
-        const { lat1, lon1, lat2, lon2, unit } = addressRequest.body;
+                // Check if both locations are provided
+                if (!location1 || !location2) {
+                    const errMessage = "Please provide both locations.";
+                    loggerService.error({ path: "/address/distance", message: errMessage }).flush();
+                    return { error: errMessage };
+                }
+
+                // Check if the locations are valid
+                const requiredProperties = [
+                    "zipcode", "number", "street", "street2", 
+                    "city", "state", "country"
+                ];
+
+                const hasRequiredProperties = (location: any) => 
+                    requiredProperties.some(prop => location.hasOwnProperty(prop));
+
+                if (
+                    typeof location1 !== "object" || 
+                    typeof location2 !== "object" || 
+                    !hasRequiredProperties(location1) || 
+                    !hasRequiredProperties(location2)
+                ) {
+                    const errMessage = "Invalid locations. Please ensure both locations have at least one required property. Required properties: " + requiredProperties.join(", ");
+                    loggerService.error({ path: "/address/distance", message: errMessage }).flush();
+                    return { error: errMessage };
+                }
+
+                location1 = await this.request({ body:  location1  });
+                location2 = await this.request({ body:  location2  });
+
+                // Check if the locations are valid
+                if (location1.length == 0 || location2.length == 0) {
+                    const errMessage = "Invalid locations. Please ensure both locations are valid.";
+                    loggerService.error({ path: "/address/distance", message: errMessage }).flush();
+                    return { error: errMessage };
+                }
+                
+                let averageCoordinates1 = await this.calculateAverageCoordinates(location1);
+                let averageCoordinates2 = await this.calculateAverageCoordinates(location2);
+                
+
+                if (!averageCoordinates1 || !averageCoordinates2) {
+                    const errMessage = "Invalid locations. Please ensure both locations are valid."
+                    loggerService.error({ path: "/address/distance", message: errMessage }).flush();
+                    return { error: errMessage };
+                }
+
+                if (addressRequest.body.unit === "KM") {
+                    
+                    const distance = await this.getKilometerDistance(averageCoordinates1.latitude, averageCoordinates1.longitude, averageCoordinates2.latitude, averageCoordinates2.longitude);
+                    return { distance: distance };
+
+                } else if (addressRequest.body.unit === "Mi") {
+                    const distance = await this.getMilesDistance(averageCoordinates1.latitude, averageCoordinates1.longitude, averageCoordinates2.latitude, averageCoordinates2.longitude);
+                    return { distance: distance };
+
+                } else {
+                    const errMessage = "Invalid unit. Please use 'KM' or 'Mi'."
+                    loggerService.error({ path: "/address/distance", message: errMessage }).flush();
+                    return { error: errMessage };
+                }
+
+
+            } catch (err) {
+                loggerService.error({ path: "/address/distance", message: `${(err as Error).message}` }).flush();
+                return { error: (err as Error).message };
+            }
+        }
 
         try {
-            let distance = null;
 
-            const numberRegex = /^-?\d+(\.\d+)?$/;
 
-            if (!lat1 || !lon1 || !lat2 || !lon2) {
-                const errorMessage = "Missing required coordinates";
-                loggerService.error({ path: "/address/distance", message: errorMessage }).flush();
-                throw new Error(errorMessage);
-            }
-
-            if (!numberRegex.test(lat1) || !numberRegex.test(lon1) || !numberRegex.test(lat2) || !numberRegex.test(lon2)) {
-                const errorMessage = "Coordinates must be valid numbers";
-                loggerService.error({ path: "/address/distance", message: errorMessage }).flush();
-                throw new Error(errorMessage);
-            }
-
-            if (unit === "KM") {
-                distance = await this.getKilometerDistance(lat1, lon1, lat2, lon2);
-            } else if (unit === "Mi") {
-                distance = await this.getMilesDistance(lat1, lon1, lat2, lon2);
-            } else {
-                throw new Error("Invalid unit");
-            }
-
-            return { distance };
 
         } catch (err) {
             const errorMessage = (err as Error).message;
@@ -87,7 +144,7 @@ class AddressService {
         }
     }
 
-    private async getKilometerDistance(lat1: string, lon1: string, lat2: string, lon2: string) {
+    private async getKilometerDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
         // Defining this function inside of this private method means it's
         // not accessible outside of it, which is perfect for encapsulation.
         const toRadians = (degrees: number) => {
@@ -98,26 +155,58 @@ class AddressService {
         const R = 6371;
 
         // Convert Lat and Longs to Radians
-        const dLat = toRadians(parseFloat(lat2) - parseFloat(lat1));
-        const dLon = toRadians(parseFloat(lon2) - parseFloat(lon1));
+        const dLat = toRadians(lat2 - lat1);
+        const dLon = toRadians(lon2 - lon1);
 
         // Haversine Formula to calculate the distance between two locations
         // on a sphere.
         const a =
             Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-             Math.cos(toRadians(parseFloat(lat1))) * Math.cos(toRadians(parseFloat(lat2))) *
+             Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
 
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-         // convert and return distance in KM
-        return parseFloat((R * c).toFixed(4));
+             // convert and return distance in KM
+            return (R * c);
     }
 
-    private async getMilesDistance(lat1: string, lon1: string, lat2: string, lon2: string) {
+    private async getMilesDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
         const kilometers = await this.getKilometerDistance(lat1, lon1, lat2, lon2);
         const milesPerKilometer = 0.621371;
-        return parseFloat((kilometers * milesPerKilometer).toFixed(4));
+        return (kilometers * milesPerKilometer);
+    }
+
+    private async calculateAverageCoordinates(location: any) {
+        if (!location || !Array.isArray(location) || location.length === 0) {
+            const errMessage = "Invalid location data. Please provide a valid array of locations.";
+            loggerService.error({ path: "/address/calculateAverageCoordinates", message: errMessage }).flush();
+            throw new Error(errMessage);
+        }
+
+        const totalCoordinates = location.reduce(
+            (totals, loc) => {
+            const latitude = parseFloat(loc.latitude);
+            const longitude = parseFloat(loc.longitude);
+
+            if (isNaN(latitude) || isNaN(longitude)) {
+                const errMessage = "Invalid latitude or longitude in location data.";
+                loggerService.error({ path: "/address/calculateAverageCoordinates", message: errMessage }).flush();
+                throw new Error(errMessage);
+            }
+
+            totals.latitude += latitude;
+            totals.longitude += longitude;
+            return totals;
+            },
+            { latitude: 0, longitude: 0 }
+        );
+
+        const averageCoordinates = {
+            latitude: totalCoordinates.latitude / location.length,
+            longitude: totalCoordinates.longitude / location.length
+        };
+
+        return averageCoordinates;
     }
 
 
