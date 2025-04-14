@@ -9,6 +9,9 @@
 5. In the .env file set `ENV` to "dev"
 6. Start the app using `npm run dev`
 
+## Tests
+- Run tests using the command `npx jest`
+
 ## Use
 
 - Using Postman or building an integration, send a request using "http://localhost:<port>/address/request"
