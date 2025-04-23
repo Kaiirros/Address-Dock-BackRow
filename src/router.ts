@@ -21,6 +21,10 @@ router.delete('*', (req: Request, res: Response, next: NextFunction) => {
     (require(getEndpointControllerPath(req))).deleteRoute(req, res, next);
 });
 
+router.post('/address/zipcode', (req: Request, res: Response, next: NextFunction) => {
+    (require(getEndpointControllerPath(req))).postRoute(req, res, next);
+});
+
 function getEndpointControllerPath(req: Request): string {
     const paths = req.baseUrl.split('/');
 
@@ -29,7 +33,6 @@ function getEndpointControllerPath(req: Request): string {
     if (paths.length === 1 || !fs.existsSync(route) || paths[1] == 'base') {
         throw new createHttpError.NotFound(`Endpoint ${req.originalUrl} not found`);
     }
-
     return route;
 }
 
