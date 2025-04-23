@@ -1,6 +1,6 @@
 import addressService from "../services/address.service";
 
-describe("Address Service", () => {
+describe("Address Service - Distance", () => {
     it("Return distance in Kilometers", async () => {
         const addressRequest = {
             body: {
@@ -179,6 +179,4 @@ describe("Address Service", () => {
         const response = await addressService.distance(addressRequest);
         expect(response).toHaveProperty("error", "Invalid locations. Please ensure both locations are valid.");
     });
-
-
 });

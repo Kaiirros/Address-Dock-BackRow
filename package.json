@@ -1,43 +1,47 @@
 {
-    "name": "addressdock",
-    "version": "1.0.0",
-    "description": "This is a TypeScript based Address System.",
-    "main": "./dist/server.js",
-    "engines": {
-        "node": "20.13.1"
-    },
-    "scripts": {
-        "prebuild": "rm -rf ./dist",
-        "build": "tsc --project ./",
-        "dev": "nodemon ./src/server.ts"
-    },
-    "repository": {
-        "type": "git",
-        "url": ""
-    },
-    "keywords": [],
-    "author": "Nick Snyder",
-    "license": "MIT",
-    "dependencies": {
-        "@types/cors": "^2.8.17",
-        "@types/express-session": "^1.18.1",
-        "@types/http-errors": "^2.0.4",
-        "@types/jest": "^29.5.14",
-        "@types/node": "^22.13.10",
-        "@types/supertest": "^6.0.2",
-        "addressdock": "file:",
-        "cors": "^2.8.5",
-        "dotenv": "^16.5.0",
-        "express": "^4.21.2",
-        "http-errors": "^2.0.0",
-        "jest": "^29.7.0",
-        "supertest": "^7.0.0",
-        "ts-jest": "^29.2.6",
-        "ts-node": "^10.9.2",
-        "typescript": "^5.8.2"
-    },
-    "devDependencies": {
-        "@types/express": "^5.0.1",
-        "nodemon": "^3.1.9"
-    }
+  "name": "addressdock",
+  "version": "1.0.0",
+  "description": "This is a TypeScript based Address System.",
+  "main": "./dist/server.js",
+  "engines": {
+    "node": "20.13.1"
+  },
+  "scripts": {
+    "prebuild": "rm -rf ./dist",
+    "build": "tsc --project ./",
+    "dev": "nodemon ./src/server.ts",
+    "lint": "eslint . --ext .ts",
+    "type-check": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [],
+  "author": "Nick Snyder",
+  "license": "MIT",
+  "dependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/express-session": "^1.18.1",
+    "@types/http-errors": "^2.0.4",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.10",
+    "@types/supertest": "^6.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "http-errors": "^2.0.0",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.56.0",
+    "nodemon": "^3.1.9"
+  }
 }
