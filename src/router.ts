@@ -29,7 +29,6 @@ function getEndpointControllerPath(req: Request): string {
     if (paths.length === 1 || !fs.existsSync(route) || paths[1] == 'base') {
         throw new createHttpError.NotFound(`Endpoint ${req.originalUrl} not found`);
     }
-    console.log(route);
     return route;
 }
 

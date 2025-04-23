@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import responseWrapper from '../services/response.service';
 import { RESPONSE_STATUS_FAIL, RESPONSE_EVENT_READ } from '../constants/generic.constants';
 import { INVALID_REQUEST } from '../constants/errors.constants';
+import loggerService from "../services/logger.service";
 import createHttpError from 'http-errors';
 
 class BaseEndpoint {
@@ -34,7 +35,6 @@ class BaseEndpoint {
 
         const temp = endPointMethod[subRoute as keyof typeof endPointMethod];
         if (!temp) {
-            console.log(`Invalid request: ${req.originalUrl}`);
             throw new createHttpError.BadRequest();
         }
 
