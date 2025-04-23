@@ -10,10 +10,6 @@ class AddressEndpoint extends baseEndpoint {
         super.executeSubRoute(addressEndpoint, req, res, next);
     }
 
-    public get(req: Request, res: Response, next: NextFunction) {
-        super.executeSubRoute(addressEndpoint, req, res, next);
-    }
-
     private count_post(req: Request, res: Response, next: NextFunction) {
         addressService.count(req)
             .then((response) => {
