@@ -223,11 +223,11 @@ class AddressService {
     
                 //fetch all addresses with this city name
                 const res = await this.request({ body: { city } });
-                if (res.length === 0) {
-                    const errMessage = `No states found for the city: ${city}.`;
-                    loggerService.error({ path: "/address/city-count", message: errMessage }).flush();
-                    return { error: errMessage };
-                }
+                // if (res.length === 0) {
+                //     const errMessage = `No states found for the city: ${city}.`;
+                //     loggerService.error({ path: "/address/city-count", message: errMessage }).flush();
+                //     return { error: errMessage };
+                // }
     
                 // extract uniqie states / provinces
                 const states = [...new Set(res.map((address: any) => address.state))];
