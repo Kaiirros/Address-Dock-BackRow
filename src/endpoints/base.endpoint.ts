@@ -34,7 +34,6 @@ class BaseEndpoint {
 
         const temp = endPointMethod[subRoute as keyof typeof endPointMethod];
         if (!temp) {
-            console.log(`Invalid request: ${req.originalUrl}`);
             throw new createHttpError.BadRequest();
         }
 

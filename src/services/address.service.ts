@@ -1,4 +1,3 @@
-import { get } from "http";
 import loggerService from "./logger.service";
 
 class AddressService {
