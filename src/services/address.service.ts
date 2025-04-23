@@ -246,6 +246,37 @@ class AddressService {
         return averageCoordinates;
     }
 
+    public async city_count(addressRequest?: any): Promise<any> {
+        if(addressRequest.body) {
+            try {
+                const { city } = addressRequest.body;
+
+                // validate input
+                if (!city) {
+                    const errMessage = "Please provide a valid city.";
+                    loggerService.error({ path: "/address/city-count", message: errMessage }).flush();
+                    return { error: errMessage };
+                }
+    
+                //fetch all addresses with this city name
+                const res = await this.request({ body: { city } });
+                if (res.length === 0) {
+                    const errMessage = `No states found for the city: ${city}.`;
+                    loggerService.error({ path: "/address/city-count", message: errMessage }).flush();
+                    return { error: errMessage };
+                }
+    
+                // extract uniqie states / provinces
+                const states = [...new Set(res.map((address: any) => address.state))];
+                
+                //return list of states
+                return { states };
+            } catch (err) {
+                loggerService.error({ path: "/address/city-count", message: `${(err as Error).message}` }).flush();
+                return { error: (err as Error).message };
+            }
+        } 
+    }
 
 }
 
