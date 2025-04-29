@@ -1,4 +1,4 @@
-name: Static Analysis
+name: Static Analysis and Testing
 
 on:
   pull_request:
@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  static-analysis:
-    name: Static Analysis
+  static-analysis-and-testing:
+    name: Static Analysis and Testing
     runs-on: ubuntu-latest
 
     steps:
@@ -29,3 +29,6 @@ jobs:
 
       - name: ESLint
         run: npx eslint . --ext .ts
+
+      - name: Run Unit Tests
+        run: npx jest
