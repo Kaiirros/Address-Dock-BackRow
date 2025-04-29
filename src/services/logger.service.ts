@@ -75,6 +75,7 @@ class Logger {
    */
   public flush(): void {
     this.writeToStandardOut();
+    this.cache = []; // Clear the cache after writing
   }
 
   /**

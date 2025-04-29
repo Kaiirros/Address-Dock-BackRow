@@ -5,26 +5,6 @@ import { ENV } from "./constants/environment-vars.constants";
 
 const router = express.Router();
 
-router.get("*", async (req: Request, res: Response, next: NextFunction) => {
-  const module = await import(getEndpointControllerPath(req));
-  module.getRoute(req, res, next);
-});
-
-router.post("*", async (req: Request, res: Response, next: NextFunction) => {
-  const module = await import(getEndpointControllerPath(req));
-  module.postRoute(req, res, next);
-});
-
-router.put("*", async (req: Request, res: Response, next: NextFunction) => {
-  const module = await import(getEndpointControllerPath(req));
-  module.putRoute(req, res, next);
-});
-
-router.delete("*", async (req: Request, res: Response, next: NextFunction) => {
-  const module = await import(getEndpointControllerPath(req));
-  module.deleteRoute(req, res, next);
-});
-
 router.post(
   "/address/zipcode",
   async (req: Request, res: Response, next: NextFunction) => {
@@ -32,6 +12,46 @@ router.post(
     module.postRoute(req, res, next);
   }
 );
+
+router.get("*", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const modulePath = getEndpointControllerPath(req);
+    const module = await import(modulePath);
+    module.getRoute(req, res, next);
+  } catch (error) {
+    next(error); // Pass error to Express error handler
+  }
+});
+
+router.post("*", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const modulePath = getEndpointControllerPath(req);
+    const module = await import(modulePath);
+    module.postRoute(req, res, next);
+  } catch (error) {
+    next(error); // Pass error to Express error handler
+  }
+});
+
+router.put("*", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const modulePath = getEndpointControllerPath(req);
+    const module = await import(modulePath);
+    module.putRoute(req, res, next);
+  } catch (error) {
+    next(error); // Pass error to Express error handler
+  }
+});
+
+router.delete("*", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const modulePath = getEndpointControllerPath(req);
+    const module = await import(modulePath);
+    module.deleteRoute(req, res, next);
+  } catch (error) {
+    next(error); // Pass error to Express error handler
+  }
+});
 
 function getEndpointControllerPath(req: Request): string {
   const paths = req.baseUrl.split("/");
