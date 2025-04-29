@@ -1,22 +1,34 @@
-import { Request, Response, NextFunction, Router } from "express";
+import { Request, Response, NextFunction } from "express";
 import BaseEndpoint from "./base.endpoint";
 import addressService from "../services/address.service";
 import loggerService from "../services/logger.service";
 import responseWrapper from "../services/response.service";
 
 class AddressEndpoint extends BaseEndpoint {
-  private router: Router;
-
   constructor() {
     super();
-    this.router = Router();
-    this.router.post("/count", this.count.bind(this));
-    this.router.post("/distance", this.distance.bind(this));
-    this.router.post("/city-count", this.cityCount.bind(this));
   }
 
-  public getRouter(): Router {
-    return this.router;
+  public async postRoute(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    const path = req.path.split("/")[2]; // Get the sub-route (count, distance, city-count)
+
+    switch (path) {
+      case "count":
+        await this.count(req, res, next);
+        break;
+      case "distance":
+        await this.distance(req, res, next);
+        break;
+      case "city-count":
+        await this.cityCount(req, res, next);
+        break;
+      default:
+        next(new Error(`Unknown endpoint: ${path}`));
+    }
   }
 
   private async count(
@@ -41,7 +53,7 @@ class AddressEndpoint extends BaseEndpoint {
     next: NextFunction
   ): Promise<void> {
     try {
-      const result = await addressService.distance(req);
+      const result = await addressService.distance({ body: req.body.body });
       res.json(responseWrapper("success", "read", result));
     } catch (err) {
       loggerService
@@ -74,4 +86,8 @@ class AddressEndpoint extends BaseEndpoint {
   }
 }
 
-export default new AddressEndpoint();
+const endpoint = new AddressEndpoint();
+export const postRoute = endpoint.postRoute.bind(endpoint);
+export const getRoute = endpoint.get.bind(endpoint);
+export const putRoute = endpoint.put.bind(endpoint);
+export const deleteRoute = endpoint.delete.bind(endpoint);
