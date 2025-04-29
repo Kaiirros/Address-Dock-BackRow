@@ -1,24 +1,36 @@
-import app from './app';
-import { SERVER_PORT } from './constants/environment-vars.constants';
+import app from "./app";
+import { SERVER_PORT } from "./constants/environment-vars.constants";
+import loggerService from "./services/logger.service";
 
 const server = app.listen(SERVER_PORT || 5000, () => {
-    console.info("==========================================================");
-    console.info(`|| The application has started on http://localhost:${SERVER_PORT} ||`);
-    console.info("==========================================================");
+  loggerService.info({
+    message: "==========================================================",
+  });
+  loggerService.info({
+    message: `|| The application has started on http://localhost:${SERVER_PORT} ||`,
+  });
+  loggerService.info({
+    message: "==========================================================",
+  });
 });
 
-function gracefulShutdownHandler(signal: NodeJS.Signals) {
-    const GRACEFUL_SHUTDOWN_TIME = 15000;
-    app.locals.HEALTH_CHECK_ENABLED = false;
+function gracefulShutdownHandler(signal: NodeJS.Signals): void {
+  const GRACEFUL_SHUTDOWN_TIME = 15000;
+  app.locals.HEALTH_CHECK_ENABLED = false;
 
-    console.info(`Caught signal ${signal} gracefully shutting down!`);
+  loggerService.info({
+    message: `Caught signal ${signal} gracefully shutting down!`,
+  });
 
-    setTimeout(() => {
-        server.close(() => {
-            console.info("No longer accepting incoming request. Gracefully shutting down!")
-            process.exit();
-        })
-    }, GRACEFUL_SHUTDOWN_TIME)
+  setTimeout(() => {
+    server.close(() => {
+      loggerService.info({
+        message:
+          "No longer accepting incoming request. Gracefully shutting down!",
+      });
+      process.exit();
+    });
+  }, GRACEFUL_SHUTDOWN_TIME);
 }
 
 process.on("SIGINT", gracefulShutdownHandler);
