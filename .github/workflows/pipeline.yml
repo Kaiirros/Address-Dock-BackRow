@@ -1,0 +1,141 @@
+name: Static Analysis and Testing
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.13.1"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type Check
+        run: npx tsc --noEmit
+
+  lint:
+    name: ESLint
+    needs: type-check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.13.1"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npx eslint . --ext .ts
+
+  test:
+    name: Unit Tests + Build
+    needs: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.13.1"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Unit Tests
+        run: npx jest
+
+      - name: Build
+        run: npm run build
+
+  deploy:
+    name: Deploy to DigitalOcean
+    needs: [type-check, lint, test]
+    runs-on: ubuntu-latest
+    # if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.13.1"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to DigitalOcean
+        uses: appleboy/ssh-action@master
+        with:
+          host: "144.126.249.162"
+          username: "root"
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            # Create directory if it doesn't exist
+            mkdir -p /var/www/addressdock
+
+            # Kill existing process if running
+            pkill -f "node dist/server.js" || true
+
+            # Remove old dist directory
+            rm -rf /var/www/addressdock/dist
+
+            # Create a temporary directory for the new dist
+            mkdir -p /tmp/addressdock-dist
+
+      - name: Upload dist directory
+        uses: appleboy/scp-action@master
+        with:
+          host: "144.126.249.162"
+          username: "root"
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          source: "dist/"
+          target: "/tmp/addressdock-dist"
+          strip_components: 0
+
+      - name: Move dist to final location
+        uses: appleboy/ssh-action@master
+        with:
+          host: "144.126.249.162"
+          username: "root"
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            # Move the new dist directory to the final location
+            mv /tmp/addressdock-dist/dist /var/www/addressdock/
+
+            # Clean up temporary directory
+            rm -rf /tmp/addressdock-dist
+
+            # Start the application
+            cd /var/www/addressdock
+            nohup node dist/server.js > addressdock.log 2>&1 &
