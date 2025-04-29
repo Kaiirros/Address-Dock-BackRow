@@ -25,13 +25,14 @@ app.get("/health", (_, res) => {
 });
 
 app.use(express.json());
-app.use("*", router);
+app.use("/", router);
 
 app.use(async (req, res: Response, next: NextFunction) => {
   next(createHttpError.BadRequest());
 });
 
-app.use(async (err: HttpError, req: Request, res: Response) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: HttpError, req: Request, res: Response, _next: NextFunction) => {
   loggerService.error({ message: err.message, path: req.path }).flush();
   res.status(err.status || 500).send({
     error: {
